@@ -26,7 +26,6 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
-
     // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
 
     // crop
@@ -40,8 +39,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     // crop out the roof traces.
     typename pcl::PointCloud<PointT>::Ptr cloud_cropped2(new pcl::PointCloud<PointT>());
     cropOp.setInputCloud(cloud_cropped);
-    cropOp.setMin(Eigen::Vector4f(-3,-1.5,-1,1));
-    cropOp.setMax(Eigen::Vector4f(3,1.5,1,1));
+    cropOp.setMin(Eigen::Vector4f(-3, -1.5, -1, 1));
+    cropOp.setMax(Eigen::Vector4f(3, 1.5, 1, 1));
     cropOp.setNegative(true);
     cropOp.filter(*cloud_cropped2);
 
@@ -122,7 +121,10 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 }
 
 template <typename PointT>
-std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
+std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::Clustering(typename pcl::PointCloud<PointT>::Ptr cloud,
+                                                                                          float clusterTolerance,
+                                                                                          int minSize,
+                                                                                          int maxSize)
 {
 
     // Time clustering process
@@ -132,7 +134,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
     // TODO:: Fill in the function to perform euclidean clustering to group detected obstacles
     // Creating the KdTree object for the search method of the extraction
-    typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>);
     tree->setInputCloud(cloud);
 
     std::vector<pcl::PointIndices> cluster_indices;
