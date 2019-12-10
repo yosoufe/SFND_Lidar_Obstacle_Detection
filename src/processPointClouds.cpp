@@ -17,19 +17,46 @@ void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr
 }
 
 template <typename PointT>
-typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
+typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud,
+                                                                              float filterRes,
+                                                                              Eigen::Vector4f minPoint,
+                                                                              Eigen::Vector4f maxPoint)
 {
 
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
+
     // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
+
+    // crop
+    typename pcl::PointCloud<PointT>::Ptr cloud_cropped(new pcl::PointCloud<PointT>());
+    typename pcl::CropBox<PointT> cropOp;
+    cropOp.setInputCloud(cloud);
+    cropOp.setMin(minPoint);
+    cropOp.setMax(maxPoint);
+    cropOp.filter(*cloud_cropped);
+
+    // crop out the roof traces.
+    typename pcl::PointCloud<PointT>::Ptr cloud_cropped2(new pcl::PointCloud<PointT>());
+    cropOp.setInputCloud(cloud_cropped);
+    cropOp.setMin(Eigen::Vector4f(-3,-1.5,-1,1));
+    cropOp.setMax(Eigen::Vector4f(3,1.5,1,1));
+    cropOp.setNegative(true);
+    cropOp.filter(*cloud_cropped2);
+
+    // Voxel filtering
+    typename pcl::PointCloud<PointT>::Ptr cloud_voxel_filtered(new pcl::PointCloud<PointT>());
+    typename pcl::VoxelGrid<PointT> sor;
+    sor.setInputCloud(cloud_cropped2);
+    sor.setLeafSize(filterRes, filterRes, filterRes);
+    sor.filter(*cloud_voxel_filtered);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloud;
+    return cloud_voxel_filtered;
 }
 
 template <typename PointT>
